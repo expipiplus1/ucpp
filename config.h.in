@@ -37,7 +37,7 @@
  * on the number of arguments a macro may, which is then limited to 32766)
  * so it is on by default. Non-LOW_MEM code is considered deprecated.
  */
-#define LOW_MEM
+#cmakedefine LOW_MEM
 
 /* ====================================================================== */
 /*
@@ -45,15 +45,15 @@
  * some paths; define MSDOS on systems with drive letters and using
  * backslashes to seperate directory components.
  */
-/* #define AMIGA */
-/* #define MSDOS */
+#cmakedefine AMIGA
+#cmakedefine MSDOS
 
 /* ====================================================================== */
 /*
  * Define this if your compiler does not know the strftime() function;
  * TurboC 2.01 under Msdos does not know strftime().
  */
-/* #define NOSTRFTIME */
+#cmakedefine NOSTRFTIME
 
 /* ====================================================================== */
 /*
@@ -65,8 +65,8 @@
  * You can disable one or both of these bufferings by defining the macros
  * NO_LIBC_BUF and NO_UCPP_BUF.
  */
-/* #define NO_LIBC_BUF */
-/* #define NO_UCPP_BUF */
+#cmakedefine NO_LIBC_BUF
+#cmakedefine NO_UCPP_BUF
 
 /*
  * On Unix stations, the system call mmap() might be used on input files.
@@ -83,7 +83,7 @@
  * with files bigger than 4 GB), this option makes ucpp fail to operate
  * on those extremely large files.
  */
-#define UCPP_MMAP
+#cmakedefine UCPP_MMAP
 
 /*
  * Performance issues:
@@ -103,7 +103,7 @@
  * otherwise, it will generate raw string contents. This setting is
  * irrelevant to the stand-alone version of ucpp.
  */
-#define PRAGMA_TOKENIZE
+#cmakedefine PRAGMA_TOKENIZE
 
 /*
  * Define this to the special character that marks the end of tokens with
@@ -114,14 +114,14 @@
  * embedded inside tokens, neither directly nor by macro substitution and
  * stringization. Besides, '\n' is portable.
  */
-#define PRAGMA_TOKEN_END	((unsigned char)'\n')
+#cmakedefine PRAGMA_TOKEN_END	@PRAGMA_TOKEN_END@
 
 /*
  * Define this if you want ucpp to include encountered #pragma directives
  * in its output in non-lexer mode; _Pragma() are translated to equivalent
  * #pragma directives.
  */
-#define PRAGMA_DUMP
+#cmakedefine PRAGMA_DUMP
 
 /*
  * According to my interpretation of the C99 standard, _Pragma() are
@@ -132,7 +132,7 @@
  * as #if, #include and #line. If you want to disable the evaluation of
  * _Pragma() inside such directives, define the following macro.
  */
-/* #define NO_PRAGMA_IN_DIRECTIVE */
+#cmakedefine NO_PRAGMA_IN_DIRECTIVE
 
 /*
  * The C99 standard mandates that the operator `##' must yield a single,
@@ -157,7 +157,7 @@
  * All this is irrelevant to lexer mode; and trying to merge incompatible
  * tokens is a shooting offence, anyway.
  */
-/* #define DSHARP_TOKEN_MERGE */
+#cmakedefine DSHARP_TOKEN_MERGE
 
 /* ====================================================================== */
 /*
@@ -165,7 +165,7 @@
  * that tell whether tokens come from a macro-replacement, and count those
  * macro-replacements.
  */
-/* #define INMACRO_FLAG */
+#cmakedefine INMACRO_FLAG
 
 /* ====================================================================== */
 /*
@@ -176,7 +176,7 @@
  * For Linux, get gcc includes too, or you will miss things like stddef.h.
  * The exact path varies much, depending on the distribution.
  */
-#define STD_INCLUDE_PATH	"/usr/local/include", "/usr/include"
+#define STD_INCLUDE_PATH @STD_INCLUDE_PATH@
 
 /* ====================================================================== */
 /*
@@ -230,20 +230,19 @@
 /*
  * For native type evaluation with a 64-bit "long long" type.
  */
-#define NATIVE_SIGNED           long long
-#define NATIVE_UNSIGNED         unsigned long long
-#define NATIVE_UNSIGNED_BITS    64
-#define NATIVE_SIGNED_MIN       (-9223372036854775807LL - 1)
-#define NATIVE_SIGNED_MAX       9223372036854775807LL
+#cmakedefine NATIVE_SIGNED @NATIVE_SIGNED@
+#cmakedefine NATIVE_UNSIGNED @NATIVE_UNSIGNED@
+#cmakedefine NATIVE_UNSIGNED_BITS @NATIVE_UNSIGNED_BITS@
+#cmakedefine NATIVE_SIGNED_MIN @NATIVE_SIGNED_MIN@
+#cmakedefine NATIVE_SIGNED_MAX @NATIVE_SIGNED_MAX@
 
 /*
  * For emulation of a 64-bit type using a native 32-bit "unsigned long"
  * type.
-#undef NATIVE_SIGNED
-#define SIMUL_ARITH_SUBTYPE     unsigned long
-#define SIMUL_SUBTYPE_BITS      32
-#define SIMUL_NUMBITS           64
  */
+#cmakedefine SIMUL_ARITH_SUBTYPE @SIMUL_ARITH_SUBTYPE@
+#cmakedefine SIMUL_SUBTYPE_BITS @SIMUL_SUBTYPE_BITS@
+#cmakedefine SIMUL_NUMBITS @SIMUL_NUMBITS@
 
 /*
  * Comment out the following line if you want to deactivate arithmetic
@@ -252,15 +251,15 @@
  * especially multiplications, but this should not be an issue with
  * typical C source code.
  */
-#define ARITHMETIC_CHECKS
+#cmakedefine ARITHMETIC_CHECKS
 
 /* ====================================================================== */
 /*
  * To force signedness of wide character constants, define WCHAR_SIGNEDNESS
  * to 0 for unsigned, 1 for signed. By default, wide character constants
  * are signed if the native `char' type is signed, and unsigned otherwise.
-#define WCHAR_SIGNEDNESS	0
  */
+#cmakedefine WCHAR_SIGNEDNESS	@WCHAR_SIGNEDNESS@
 
 /*
  * Standard assertions. They should include one cpu() assertion, one machine()
@@ -276,7 +275,7 @@
  *
  * If you want no standard assertion, define STD_ASSERT to 0.
  */
-#define STD_ASSERT 0
+#define STD_ASSERT @STD_ASSERT@
 /*
 #define STD_ASSERT	"cpu(i386)", "machine(i386)", "system(unix)", \
 			"system(freebsd)"
@@ -289,7 +288,7 @@
  * Each string must be either "name" or "name=token-list". If you want
  * no predefined macro, define STD_MACROS to 0.
  */
-#define STD_MACROS 0
+#define STD_MACROS @STD_MACROS@
 /*
 #define STD_MACROS	"__FreeBSD=4", "__unix", "__i386", \
 			"__FreeBSD__=4", "__unix__", "__i386__"
@@ -300,14 +299,8 @@
  * Default flags; HANDLE_ASSERTIONS is required for Solaris system headers.
  * See cpp.h for the definition of these flags.
  */
-#define DEFAULT_CPP_FLAGS	(DISCARD_COMMENTS | WARN_STANDARD \
-				| WARN_PRAGMA | FAIL_SHARP | MACRO_VAARG \
-				| CPLUSPLUS_COMMENTS | LINE_NUM | TEXT_OUTPUT \
-				| KEEP_OUTPUT | HANDLE_TRIGRAPHS \
-				| HANDLE_ASSERTIONS)
-#define DEFAULT_LEXER_FLAGS	(DISCARD_COMMENTS | WARN_STANDARD | FAIL_SHARP \
-				| MACRO_VAARG | CPLUSPLUS_COMMENTS | LEXER \
-				| HANDLE_TRIGRAPHS | HANDLE_ASSERTIONS)
+#cmakedefine DEFAULT_CPP_FLAGS @DEFAULT_CPP_FLAGS@ 
+#cmakedefine DEFAULT_LEXER_FLAGS @DEFAULT_LEXER_FLAGS@
 
 /* ====================================================================== */
 /*
@@ -315,7 +308,7 @@
  * This is non-ANSI, but it improves performance on some POSIX system.
  * On typical C source code, such improvement is completely negligeable.
  */
-/* #define POSIX_JMP */
+#cmakedefine POSIX_JMP
 
 /* ====================================================================== */
 /*
@@ -329,14 +322,14 @@
  * that lexer.c defines a static array of size MSTATE * MAX_CHAR_VAL
  * values of type int (MSTATE is defined in lexer.c and is about 40).
  */
-#define MAX_CHAR_VAL	128
+#cmakedefine MAX_CHAR_VAL @MAX_CHAR_VAL@
 
 /*
  * If you want some extra character to be considered as whitespace,
  * define this macro to that space. On ISO-8859-1 machines, 160 is
  * the code for the unbreakable space.
  */
-/* #define UNBREAKABLE_SPACE	160 */
+#cmakedefine UNBREAKABLE_SPACE @UNBREAKABLE_SPACE@
 
 /*
  * If you want whitespace tokens contents to be recorded (making them
@@ -347,6 +340,6 @@
  * it might slow down a bit ucpp, and with this option, comments will be
  * kept inside #pragma directives).
  */
-/* #define SEMPER_FIDELIS */
+#cmakedefine SEMPER_FIDELIS
 
 /* End of options overridable by UCPP_CONFIG and config.h */
