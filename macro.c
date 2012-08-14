@@ -329,6 +329,7 @@ int handle_define(struct lexer_state *ls)
 	
 #ifdef LOW_MEM
 	mv.art = mv.nt = 0;
+    mv.t = NULL;
 #endif
 	/* find the next non-white token on the line, this should be
 	   the macro name */
@@ -932,7 +933,7 @@ static inline char *stringify_string(char *x)
 {
 	size_t l;
 	int i, inside_str = 0, inside_cc = 0, must_quote, has_quoted = 0;
-	char *y, *d;
+	char *y, *d = NULL;
 
 	for (i = 0; i < 2; i ++) {
 		if (i) d[0] = '"';
@@ -1028,10 +1029,10 @@ int substitute_macro(struct lexer_state *ls, struct macro *m,
 	struct token_fifo *tfi, int penury, int reject_nested, long l)
 {
 	char *mname = HASH_ITEM_NAME(m);
-	struct token_fifo *atl, etl;
+	struct token_fifo *atl = NULL, etl;
 	struct token t, *ct;
 	int i, save_nest = m->nest;
-	size_t save_art, save_tfi, etl_limit;
+	size_t save_art, save_tfi = 0, etl_limit;
 	int ltwds, ntwds, ltwws;
 	int pragma_op = 0;
 
@@ -1757,6 +1758,9 @@ int define_macro(struct lexer_state *ls, char *def)
 int undef_macro(struct lexer_state *ls, char *def)
 {
 	char *c = def;
+
+    /* Squash unused warning on ls */
+    (void)(ls);
 
 	if (!*c) {
 		error(-1, "void macro name");

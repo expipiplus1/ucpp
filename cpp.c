@@ -991,6 +991,7 @@ static int handle_if(struct lexer_state *ls)
 
 	/* first, get the whole line */
 	tf.art = tf.nt = 0;
+    tf.t = NULL;
 	while (!next_token(ls) && ls->ctok->type != NEWLINE) {
 		struct token t;
 
@@ -1197,7 +1198,7 @@ error1:
 static int handle_include(struct lexer_state *ls, unsigned long flags, int nex)
 {
 	int c, string_fname = 0;
-	char *fname;
+	char *fname = NULL;
 	unsigned char *fname2;
 	size_t fname_ptr = 0;
 	long l = ls->line;
@@ -1442,10 +1443,13 @@ static int handle_line(struct lexer_state *ls, unsigned long flags)
 	char *fname;
 	long l = ls->line;
 	struct token_fifo tf, tf2, *save_tf;
-	size_t nl, j;
+	size_t nl;
+    /* volatile to squash longjmp warning */
+    volatile size_t j;
 	unsigned long z;
 
 	tf.art = tf.nt = 0;
+    tf.t = NULL;
 	while (!next_token(ls) && ls->ctok->type != NEWLINE) {
 		if (!ttMWS(ls->ctok->type)) {
 			struct token t;
