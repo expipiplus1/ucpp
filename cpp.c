@@ -293,7 +293,7 @@ static void del_found_file_sys(void *m)
 struct protect protect_detect;
 static struct protect *protect_detect_stack = 0;
 
-void set_init_filename(char *x, int real_file)
+void set_init_filename(const char *x, int real_file)
 {
 	if (current_filename) freemem(current_filename);
 	current_filename = sdup(x);

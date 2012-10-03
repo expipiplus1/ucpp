@@ -251,7 +251,7 @@ int define_macro(struct lexer_state *, char *);
 int undef_macro(struct lexer_state *, char *);
 void print_defines(void);
 
-void set_init_filename(char *, int);
+void set_init_filename(const char *, int);
 void init_cpp(void);
 void init_include_path(char *[]);
 void init_lexer_state(struct lexer_state *);

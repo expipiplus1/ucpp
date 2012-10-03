@@ -41,7 +41,7 @@
  * type is big enough to hold 32-bit arbitrary numbers, a 16-bit number
  * otherwise.
  */
-static unsigned hash_string(char *name)
+static unsigned hash_string(const char *name)
 {
 	unsigned h = 0;
 
@@ -191,7 +191,7 @@ void *HTT2_get(HTT2 *htt, char *name)
 /*
  * Make an item identifier from its name and its hash value.
  */
-static char *make_ident(char *name, unsigned u)
+static char *make_ident(const char *name, unsigned u)
 {
 	size_t n = strlen(name) + 1;
 	char *ident = getmem(n + sizeof(unsigned));
@@ -223,7 +223,7 @@ static char *make_fake_ident(unsigned u, hash_item_header *next)
  *     3.2. if the node is fake, look for the name in the list; if not found,
  *          add the node at the list end
  */
-static void *internal_put(HTT *htt, void *item, char *name, int reduced)
+static void *internal_put(HTT *htt, void *item, const char *name, int reduced)
 {
 	unsigned u = hash_string(name), v;
 	int ls;
@@ -277,7 +277,7 @@ static void *internal_put(HTT *htt, void *item, char *name, int reduced)
 }
 
 /* see nhash.h */
-void *HTT_put(HTT *htt, void *item, char *name)
+void *HTT_put(HTT *htt, void *item, const char *name)
 {
 	return internal_put(htt, item, name, 0);
 }

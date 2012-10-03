@@ -59,20 +59,20 @@ void freemem_debug(void *, char *, int);
 #endif
 
 void *incmem(void *, size_t, size_t);
-char *sdup(char *);
+char *sdup(const char *);
 
 #if defined MEM_DEBUG
 void *incmem_debug(void *, size_t, size_t, char *, int);
 #undef incmem
 #define incmem(x, y, z)	incmem_debug(x, y, z, __FILE__, __LINE__)
 void report_leaks(void);
-char *sdup_debug(char *, char *, int);
+char *sdup_debug(const char *, char *, int);
 #define sdup(x)		sdup_debug(x, __FILE__, __LINE__)
 #endif
 
 #ifdef AUDIT
-void *mmv(void *, void *, size_t);
-void *mmvwo(void *, void *, size_t);
+void *mmv(void *, const void *, size_t);
+void *mmvwo(void *, const void *, size_t);
 #else
 #define mmv	memcpy
 #define mmvwo	memmove

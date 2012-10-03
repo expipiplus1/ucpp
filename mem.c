@@ -148,7 +148,7 @@ void (freemem)(void *x)
 /*
  * This function copies n bytes from src to dest
  */
-void *mmv(void *dest, void *src, size_t n)
+void *mmv(void *dest, const void *src, size_t n)
 {
 	return memcpy(dest, src, n);
 }
@@ -156,7 +156,7 @@ void *mmv(void *dest, void *src, size_t n)
 /*
  * This function copies n bytes from src to dest
  */
-void *mmvwo(void *dest, void *src, size_t n)
+void *mmvwo(void *dest, const void *src, size_t n)
 {
 	return memmove(dest, src, n);
 }
@@ -166,7 +166,7 @@ void *mmvwo(void *dest, void *src, size_t n)
 /*
  * This function creates a new char * and fills it with a copy of src
  */
-char *(sdup)(char *src)
+char *(sdup)(const char *src)
 {
 	size_t n = 1 + strlen(src);
 	char *x = getmem(n);
@@ -203,7 +203,7 @@ void *(incmem)(void *x, size_t s, size_t ns)
 	return incmem(x, s, ns);
 }
 
-char *(sdup)(char *s)
+char *(sdup)(const char *s)
 {
 	return sdup(s);
 }
@@ -306,7 +306,7 @@ void *incmem_debug(void *x, size_t ol, size_t nl, char *file, int line)
 	return y;
 }
 
-char *sdup_debug(char *src, char *file, int line)
+char *sdup_debug(const char *src, char *file, int line)
 {
 	size_t n = 1 + strlen(src);
 	char *x = getmem_debug(n, file, line);

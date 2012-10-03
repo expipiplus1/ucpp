@@ -90,7 +90,7 @@ void HTT_init(HTT *htt, void (*deldata)(void *));
  * table and NULL is returned. The object pointed to by `item' is
  * linked from the table, but not the string pointed to by `name'.
  */
-void *HTT_put(HTT *htt, void *item, char *name);
+void *HTT_put(HTT *htt, void *item, const char *name);
 
 /*
  * Retrieve an item by name from the hash table. NULL is returned if
