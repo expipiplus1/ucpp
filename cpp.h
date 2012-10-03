@@ -30,6 +30,11 @@
 #ifndef UCPP__CPP__
 #define UCPP__CPP__
 
+#ifdef __cplusplus 
+extern "C"
+{
+#endif
+
 /*
  * Uncomment the following if you want ucpp to use externally provided
  * error-reporting functions (ucpp_warning(), ucpp_error() and ucpp_ouch())
@@ -312,6 +317,10 @@ extern int *transient_characters;
 #define STRING_TOKEN(x)    ((x) == NONE || ((x) >= COMMENT && (x) <= CHAR))
 #else
 #define STRING_TOKEN(x)    ((x) >= NUMBER && (x) <= CHAR)
+#endif
+
+#ifdef __cplusplus 
+} // End of extern "C"
 #endif
 
 #endif
