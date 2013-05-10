@@ -55,8 +55,8 @@ set( CMAKE_C_FLAGS_RELEASE
 set( CMAKE_C_FLAGS_PROFILE 
      "${CMAKE_C_FLAGS_PROFILE} -O  -W -Wall -ansi -DMEM_CHECK -pg" )
 
-set( ucpp_SOURCE # arith.c 
-                 # arith.h
+set( ucpp_SOURCE arith.c
+                 arith.h
                  assert.c 
                  cpp.c 
                  cpp.h 
@@ -69,7 +69,10 @@ set( ucpp_SOURCE # arith.c
                  nhash.h 
                  tune.h 
                  ucppi.h )
- 
+
+set_source_files_properties( arith.c PROPERTIES HEADER_FILE_ONLY TRUE )
+set_source_files_properties( arith.h PROPERTIES HEADER_FILE_ONLY TRUE )
+
 include( CheckFunctionExists )
 
 option( STAND_ALONE              "Build the stand alone version of ucpp" OFF )
