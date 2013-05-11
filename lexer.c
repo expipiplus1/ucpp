@@ -34,11 +34,6 @@
 #include <limits.h>
 #include "ucppi.h"
 #include "mem.h"
-#ifdef UCPP_MMAP
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#endif
 
 /*
  * Character classes for description of the automaton.
@@ -491,13 +486,6 @@ static inline int read_char(struct lexer_state *ls)
 	while (1) {
 #ifndef NO_UCPP_BUF
 		if (ls->pbuf == ls->ebuf) {
-#ifdef UCPP_MMAP
-			if (ls->from_mmap) {
-				munmap((void *)ls->input_buf, ls->ebuf);
-				ls->from_mmap = 0;
-				ls->input_buf = ls->input_buf_sav;
-			}
-#endif
 			ls->ebuf = fread(ls->input_buf, 1,
 				INPUT_BUF_MEMG, ls->input);
 			ls->pbuf = 0;

@@ -69,32 +69,12 @@
 #cmakedefine NO_UCPP_BUF
 
 /*
- * On Unix stations, the system call mmap() might be used on input files.
- * This option is a subclause of ucpp internal buffering. On one station,
- * a 10% speed improvement was observed. Do not define this unless the
- * host architecture has the following characteristics:
- *  -- Posix / Single Unix compliance
- *  -- Text files correspond one to one with memory representation
- * If a file is not seekable or not mmapable, ucpp will revert to the
- * standard fread() solution.
- *
- * This feature is still considered beta quality. On some systems where
- * files can be bigger than memory address space (mainly, 32-bit systems
- * with files bigger than 4 GB), this option makes ucpp fail to operate
- * on those extremely large files.
- */
-#cmakedefine UCPP_MMAP
-
-/*
  * Performance issues:
  * -- On memory-starved systems, such as Minix-i86, do not use ucpp
  * buffering; keep only libc buffering.
- * -- If you do not use libc buffering, activate the UCPP_MMAP option.
- * Note that the UCPP_MMAP option is ignored if ucpp buffering is not
- * activated.
  *
  * On an Athlon 1200 running FreeBSD 4.7, the best performances are
- * achieved when libc buffering is activated and/or UCPP_MMAP is on.
+ * achieved when libc buffering is activated.
  */
 
 /* ====================================================================== */

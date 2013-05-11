@@ -153,10 +153,6 @@ struct lexer_state {
 	FILE *input;
 #ifndef NO_UCPP_BUF
 	unsigned char *input_buf;
-#ifdef UCPP_MMAP
-	int from_mmap;
-	unsigned char *input_buf_sav;
-#endif
 #endif
 	unsigned char *input_string;
 	size_t ebuf;
@@ -271,11 +267,6 @@ int enter_file(struct lexer_state *, unsigned long);
 int cpp(struct lexer_state *);
 void set_identifier_char(int c);
 void unset_identifier_char(int c);
-
-#ifdef UCPP_MMAP
-FILE *fopen_mmap_file(char *);
-void set_input_file(struct lexer_state *, FILE *);
-#endif
 
 struct stack_context {
 	char *long_name, *name;

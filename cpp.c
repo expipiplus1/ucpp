@@ -44,12 +44,6 @@
 #include "ucppi.h"
 #include "mem.h"
 #include "nhash.h"
-#ifdef UCPP_MMAP
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#endif
 
 /*
  * The standard path where includes are looked for.
@@ -327,9 +321,6 @@ static void reinit_lexer_state(struct lexer_state *ls, int wb)
 {
 #ifndef NO_UCPP_BUF
 	ls->input_buf = wb ? getmem(INPUT_BUF_MEMG) : 0;
-#ifdef UCPP_MMAP
-	ls->from_mmap = 0;
-#endif
 #endif
 	ls->input = 0;
 	ls->ebuf = ls->pbuf = 0;
@@ -393,10 +384,6 @@ static void restore_lexer_state(struct lexer_state *ls,
 #ifndef NO_UCPP_BUF
 	freemem(ls->input_buf);
 	ls->input_buf = lsbak->input_buf;
-#ifdef UCPP_MMAP
-	ls->from_mmap = lsbak->from_mmap;
-	ls->input_buf_sav = lsbak->input_buf_sav;
-#endif
 #endif
 	ls->input = lsbak->input;
 	ls->ebuf = lsbak->ebuf;
@@ -415,13 +402,6 @@ static void restore_lexer_state(struct lexer_state *ls,
  */
 static void close_input(struct lexer_state *ls)
 {
-#ifdef UCPP_MMAP
-	if (ls->from_mmap) {
-		munmap((void *)ls->input_buf, ls->ebuf);
-		ls->from_mmap = 0;
-		ls->input_buf = ls->input_buf_sav;
-	}
-#endif
 	if (ls->input) {
 		fclose(ls->input);
 		ls->input = 0;
@@ -586,63 +566,6 @@ int enter_file(struct lexer_state *ls, unsigned long flags)
 	return 0;
 }
 
-#ifdef UCPP_MMAP
-/*
- * We open() the file, then fdopen() it and fseek() to its end. If the
- * fseek() worked, we try to mmap() the file, up to the point where we
- * arrived.
- * On an architecture where end-of-lines are multibytes and translated
- * into single '\n', bad things could happen. We strongly hope that, if
- * we could fseek() to the end but could not mmap(), then we can get back.
- */
-static void *find_file_map;
-static size_t map_length;
-
-FILE *fopen_mmap_file(char *name)
-{
-	FILE *f;
-	int fd;
-	long l;
-
-	find_file_map = 0;
-	fd = open(name, O_RDONLY, 0);
-	if (fd < 0) return 0;
-	l = lseek(fd, 0, SEEK_END);
-	f = fdopen(fd, "r");
-	if (!f) {
-		close(fd);
-		return 0;
-	}
-	if (l < 0) return f;	/* not seekable */
-	map_length = l;
-	if ((find_file_map = mmap(0, map_length, PROT_READ,
-		MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
-		/* we could not mmap() the file; get back */
-		find_file_map = 0;
-		if (fseek(f, 0, SEEK_SET)) {
-			/* bwaah... can't get back. This file is cursed. */
-			fclose(f);
-			return 0;
-		}
-	}
-	return f;
-}
-
-void set_input_file(struct lexer_state *ls, FILE *f)
-{
-	ls->input = f;
-	if (find_file_map) {
-		ls->from_mmap = 1;
-		ls->input_buf_sav = ls->input_buf;
-		ls->input_buf = find_file_map;
-		ls->pbuf = 0;
-		ls->ebuf = map_length;
-	} else {
-		ls->from_mmap = 0;
-	}
-}
-#endif
-
 /*
  * Find a file by looking through the include path.
  * return value: a FILE * on the file, opened in "r" mode, or 0.
@@ -729,11 +652,7 @@ static FILE *find_file(char *name, int localdir)
 	protect_detect.ff = new_found_file();
 	nffa = 1;
 	if (localdir &&
-#ifdef UCPP_MMAP
-		(f = fopen_mmap_file(s ? s : name))
-#else
 		(f = fopen(s ? s : name, "r"))
-#endif
 		) {
 		lf = 1;
 		goto found_file;
@@ -796,11 +715,7 @@ static FILE *find_file(char *name, int localdir)
 			}
 			goto found_file_cache;
 		}
-#ifdef UCPP_MMAP
-		f = fopen_mmap_file(s);
-#else
 		f = fopen(s, "r");
-#endif
 		if (f) goto found_file;
 		freemem(s);
 		s = 0;
@@ -830,11 +745,7 @@ found_file_cache:
 		protect_detect.state = 0;
 	}
 	protect_detect.ff = ff;
-#ifdef UCPP_MMAP
-	f = fopen_mmap_file(HASH_ITEM_NAME(ff));
-#else
 	f = fopen(HASH_ITEM_NAME(ff), "r");
-#endif
 	if (!f) goto zero_out;
 	find_file_error = FF_KNOWN;
 	goto found_file_2;
@@ -929,11 +840,7 @@ static FILE *find_file_next(char *name)
 				protect_detect.state = 0;
 			}
 			protect_detect.ff = ff;
-#ifdef UCPP_MMAP
-			f = fopen_mmap_file(HASH_ITEM_NAME(ff));
-#else
 			f = fopen(HASH_ITEM_NAME(ff), "r");
-#endif
 			if (!f) {
 				/* file is referenced but yet unavailable. */
 				freemem(s);
@@ -943,11 +850,7 @@ static FILE *find_file_next(char *name)
 			freemem(s);
 			s = HASH_ITEM_NAME(ff);
 		} else {
-#ifdef UCPP_MMAP
-			f = fopen_mmap_file(s);
-#else
 			f = fopen(s, "r");
-#endif
 			if (f) {
 				if (emit_dependencies == 2) {
 					fprintf(emit_output, " %s", s);
@@ -1422,11 +1325,7 @@ do_include_next:
 		freemem(fname);
 		return 0;
 	}
-#ifdef UCPP_MMAP
-	set_input_file(ls, f);
-#else
 	ls->input = f;
-#endif
 	current_filename = fname;
 	enter_file(ls, flags);
 	return 0;
@@ -2472,14 +2371,7 @@ static int parse_opt(int argc, char *argv[], struct lexer_state *ls)
 	init_tables(ls->flags & HANDLE_ASSERTIONS);
 	init_include_path(0);
 	if (filename) {
-#ifdef UCPP_MMAP
-		FILE *f = fopen_mmap_file(filename);
-
-		ls->input = 0;
-		if (f) set_input_file(ls, f);
-#else
 		ls->input = fopen(filename, "r");
-#endif
 		if (!ls->input) {
 			error(-1, "file '%s' not found", filename);
 			return 1;

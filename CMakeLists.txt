@@ -129,8 +129,6 @@ if( DEFAULT_STD_INCLUDE_PATH )
     set( STD_INCLUDE_PATH "\"/usr/local/include\", \"/usr/include\"" )
 endif()
 
-check_function_exists( mmap UCPP_MMAP )
-
 check_function_exists( strftime HAVE_STRFTIME )
 if( NOT HAVE_STRFTIME )
     set( NOSTRFTIME ON CACHE BOOL "The system doesn't have strftime" )
