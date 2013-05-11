@@ -150,14 +150,14 @@ struct token_fifo {
 
 struct lexer_state {
 	/* input control */
-	FILE *input;
-#ifndef NO_UCPP_BUF
-	unsigned char *input_buf;
-#endif
+    const unsigned char *input_buf;
+    int external_buffer;
 	unsigned char *input_string;
-	size_t ebuf;
+    /* our position in the buffer */
 	size_t pbuf;
-	int lka[2];
+    /* the size of the buffer */
+    size_t ebuf;
+    int lka[2];
 	int nlka;
 	int macfile;
 	int last;
@@ -169,9 +169,7 @@ struct lexer_state {
 	/* output control */
 	FILE *output;
 	struct token_fifo *output_fifo, *toplevel_of;
-#ifndef NO_UCPP_BUF
 	unsigned char *output_buf;
-#endif
 	size_t sbuf;
 
 	/* token control */
@@ -238,9 +236,7 @@ struct lexer_state {
  * Public function prototypes
  */
 
-#ifndef NO_UCPP_BUF
 void flush_output(struct lexer_state *);
-#endif
 
 void init_assertions(void);
 int make_assertion(char *);
@@ -253,6 +249,7 @@ int undef_macro(struct lexer_state *, char *);
 void print_defines(void);
 
 void set_init_filename(const char *, int);
+void set_init_buffer(struct lexer_state *, const unsigned char *, size_t);
 void init_cpp(void);
 void init_include_path(char *[]);
 void init_lexer_state(struct lexer_state *);
@@ -311,7 +308,7 @@ extern int *transient_characters;
 #endif
 
 #ifdef __cplusplus 
-} // End of extern "C"
+} /* End of extern "C" */
 #endif
 
 #endif

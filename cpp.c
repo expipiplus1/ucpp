@@ -304,6 +304,18 @@ void set_init_filename(const char *x, int real_file)
 	}
 }
 
+void set_init_buffer(struct lexer_state *ls,
+                     const unsigned char *buffer,
+                     size_t size)
+{
+    if (ls->input_buf && !ls->external_buffer)
+        freemem((unsigned char*)ls->input_buf);
+    ls->input_buf = buffer;
+    ls->pbuf = 0;
+    ls->ebuf = size;
+    ls->external_buffer = 1;
+}
+
 static void init_found_files(void)
 {
 	if (found_files_init_done) HTT_kill(&found_files);
@@ -317,12 +329,9 @@ static void init_found_files(void)
 /*
  * Set the lexer state at the beginning of a file.
  */
-static void reinit_lexer_state(struct lexer_state *ls, int wb)
+static void reinit_lexer_state(struct lexer_state *ls)
 {
-#ifndef NO_UCPP_BUF
-	ls->input_buf = wb ? getmem(INPUT_BUF_MEMG) : 0;
-#endif
-	ls->input = 0;
+    ls->input_buf = 0;
 	ls->ebuf = ls->pbuf = 0;
 	ls->nlka = 0;
 	ls->macfile = 0;
@@ -343,10 +352,8 @@ static void reinit_lexer_state(struct lexer_state *ls, int wb)
  */
 void init_buf_lexer_state(struct lexer_state *ls, int wb)
 {
-	reinit_lexer_state(ls, wb);
-#ifndef NO_UCPP_BUF
+    reinit_lexer_state(ls);
 	ls->output_buf = wb ? getmem(OUTPUT_BUF_MEMG) : 0;
-#endif
 	ls->sbuf = 0;
 	ls->output_fifo = 0;
 
@@ -372,7 +379,6 @@ void init_buf_lexer_state(struct lexer_state *ls, int wb)
 void init_lexer_state(struct lexer_state *ls)
 {
 	init_buf_lexer_state(ls, 1);
-	ls->input = 0;
 }
 
 /*
@@ -381,11 +387,9 @@ void init_lexer_state(struct lexer_state *ls)
 static void restore_lexer_state(struct lexer_state *ls,
 	struct lexer_state *lsbak)
 {
-#ifndef NO_UCPP_BUF
-	freemem(ls->input_buf);
+    if( !ls->external_buffer )
+        freemem((unsigned char*)ls->input_buf);
 	ls->input_buf = lsbak->input_buf;
-#endif
-	ls->input = lsbak->input;
 	ls->ebuf = lsbak->ebuf;
 	ls->pbuf = lsbak->pbuf;
 	ls->nlka = lsbak->nlka;
@@ -395,17 +399,6 @@ static void restore_lexer_state(struct lexer_state *ls,
 	ls->ifnest = lsbak->ifnest;
 	ls->condf[0] = lsbak->condf[0];
 	ls->condf[1] = lsbak->condf[1];
-}
-
-/*
- * close input file operations on a struct lexer_state
- */
-static void close_input(struct lexer_state *ls)
-{
-	if (ls->input) {
-		fclose(ls->input);
-		ls->input = 0;
-	}
 }
 
 /*
@@ -438,7 +431,6 @@ static void pop_file_context(struct lexer_state *ls)
 #ifdef AUDIT
 	if (ls_depth <= 0) ouch("prepare to meet thy creator");
 #endif
-	close_input(ls);
 	restore_lexer_state(ls, &(ls_stack[-- ls_depth].ls));
 	if (protect_detect.macro) freemem(protect_detect.macro);
 	protect_detect = protect_detect_stack[ls_depth];
@@ -486,22 +478,18 @@ void init_lexer_mode(struct lexer_state *ls)
 }
 
 /*
- * release memory used by a struct lexer_state; this implies closing
- * any input stream held by this structure.
+ * release memory used by a struct lexer_state;
  */
 void free_lexer_state(struct lexer_state *ls)
 {
-	close_input(ls);
-#ifndef NO_UCPP_BUF
-	if (ls->input_buf) {
-		freemem(ls->input_buf);
+    if (ls->input_buf && !ls->external_buffer) {
+        freemem((unsigned char*)ls->input_buf);
 		ls->input_buf = 0;
 	}
 	if (ls->output_buf) {
 		freemem(ls->output_buf);
 		ls->output_buf = 0;
 	}
-#endif
 	if (ls->ctok && (!ls->output_fifo || ls->output_fifo->nt == 0)) {
 		freemem(ls->ctok->name);
 		freemem(ls->ctok);
@@ -1102,7 +1090,8 @@ static int handle_include(struct lexer_state *ls, unsigned long flags, int nex)
 {
 	int c, string_fname = 0;
 	char *fname = NULL;
-	unsigned char *fname2;
+    unsigned char *fname2;
+    unsigned char *file_buffer;
 	size_t fname_ptr = 0;
 	long l = ls->line;
 	int x, y;
@@ -1165,11 +1154,11 @@ include_last_chance:
 	fname2[0] = '<';
 	/*
 	 * We merely copy the lexer_state structure; this should be ok,
-	 * since we do want to share the memory structure (garbage_fifo),
+     * since we do want to share the memory structure (garbage_fifo),
 	 * and do not touch any other context-full thing.
 	 */
 	alt_ls = *ls;
-	alt_ls.input = 0;
+    alt_ls.input_buf = 0;
 	alt_ls.input_string = fname2;
 	alt_ls.pbuf = 0;
 	alt_ls.ebuf = fname_ptr + 1;
@@ -1303,7 +1292,7 @@ do_include_next:
 	if (!(ls->flags & LEXER) && (ls->flags & KEEP_OUTPUT))
 		put_char(ls, '\n');
 	push_file_context(ls);
-	reinit_lexer_state(ls, 1);
+    reinit_lexer_state(ls);
 #ifdef MSDOS
 	/* on msdos systems, replace all / by \ */
 	{
@@ -1325,7 +1314,19 @@ do_include_next:
 		freemem(fname);
 		return 0;
 	}
-	ls->input = f;
+
+    /* Open the file and fill up the buffer in lexer */
+    fseek(f, 0, SEEK_END);
+    ls->ebuf = ftell(f);
+    ls->pbuf = 0;
+    rewind(f);
+    file_buffer = getmem(ls->ebuf+1);
+    fread(file_buffer, 1, ls->ebuf, f);
+    file_buffer[ls->ebuf] = 0;
+    ls->input_buf = file_buffer;
+    ls->external_buffer = 0;
+    fclose(f);
+
 	current_filename = fname;
 	enter_file(ls, flags);
 	return 0;
@@ -1930,7 +1931,6 @@ int cpp(struct lexer_state *ls)
 			r = CPPERR_NEST;
 		}
 		if (ls_depth == 0) return CPPERR_EOF;
-		close_input(ls);
 		if (!(ls->flags & LEXER) && !ls->ltwnl) {
 			put_char(ls, '\n');
 			ls->ltwnl = 1;
@@ -2064,11 +2064,9 @@ int check_cpp_errors(struct lexer_state *ls)
 		put_char(ls, '\n');
 	}
 	if (emit_dependencies) fputc('\n', emit_output);
-#ifndef NO_UCPP_BUF
 	if (!(ls->flags & LEXER)) {
 		flush_output(ls);
 	}
-#endif
 	if ((ls->flags & WARN_TRIGRAPHS) && ls->count_trigraphs)
 		warning(0, "%ld trigraph(s) encountered", ls->count_trigraphs);
 	return 0;

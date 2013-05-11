@@ -866,7 +866,7 @@ static inline int concat_token(struct token *t1, struct token *t2)
 	mmv(x, n1, l1);
 	mmv(x + l1, n2, l2);
 	x[l1 + l2] = 0;
-	dsharp_lexer.input = 0;
+    dsharp_lexer.input_buf = 0;
 	dsharp_lexer.input_string = x;
 	dsharp_lexer.pbuf = 0;
 	dsharp_lexer.ebuf = l1 + l2;
@@ -894,7 +894,7 @@ static char *tokenize_string(struct lexer_state *ls, char *buf)
 	size_t bl = strlen(buf);
 	int r;
 
-	tokenize_lexer.input = 0;
+    tokenize_lexer.input_buf = 0;
 	tokenize_lexer.input_string = (unsigned char *)buf;
 	tokenize_lexer.pbuf = 0;
 	tokenize_lexer.ebuf = bl;
@@ -1698,7 +1698,7 @@ int define_macro(struct lexer_state *ls, char *def)
 			*(c + n - 1) = '\n';
 			init_buf_lexer_state(&lls, 0);
 			lls.flags = ls->flags | LEXER;
-			lls.input = 0;
+            lls.input_buf = 0;
 			lls.input_string = (unsigned char *)c;
 			lls.pbuf = 0;
 			lls.ebuf = n;

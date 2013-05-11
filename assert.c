@@ -349,7 +349,7 @@ int make_assertion(char *aval)
 	*(c + n - 1) = '\n';
 	init_buf_lexer_state(&lls, 0);
 	lls.flags = DEFAULT_LEXER_FLAGS;
-	lls.input = 0;
+    lls.input_buf = 0;
 	lls.input_string = (unsigned char *)c;
 	lls.pbuf = 0;
 	lls.ebuf = n;
@@ -370,10 +370,9 @@ int destroy_assertion(char *aval)
 	char *c = sdup(aval);
 	int ret;
 
-	*(c + n - 1) = '\n';
+    *(c + n - 1) = '\n';
 	init_buf_lexer_state(&lls, 0);
 	lls.flags = DEFAULT_LEXER_FLAGS;
-	lls.input = 0;
 	lls.input_string = (unsigned char *)c;
 	lls.pbuf = 0;
 	lls.ebuf = n;

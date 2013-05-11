@@ -422,7 +422,6 @@ int space_char(int c)
 	return 0;
 }
 
-#ifndef NO_UCPP_BUF
 /*
  * our output buffer is full, flush it
  */
@@ -442,7 +441,6 @@ void flush_output(struct lexer_state *ls)
 	}
 	ls->sbuf = 0;
 }
-#endif
 
 /*
  * Output one character; flush the buffer if needed.
@@ -450,15 +448,8 @@ void flush_output(struct lexer_state *ls)
  */
 static inline void write_char(struct lexer_state *ls, unsigned char c)
 {
-#ifndef NO_UCPP_BUF
 	ls->output_buf[ls->sbuf ++] = c;
 	if (ls->sbuf == OUTPUT_BUF_MEMG) flush_output(ls);
-#else
-	if (putc((int)c, ls->output) == EOF) {
-		error(ls->line, "output write error (disk full ?)");
-		die();
-	}
-#endif
 	if (c == '\n') {
 		ls->oline ++;
 	}
@@ -479,25 +470,21 @@ static inline int read_char(struct lexer_state *ls)
 {
 	unsigned char c;
 
-	if (!ls->input) {
+    /* TODO check that comparing input_buf here is the same as comparing input*/
+    if (!ls->input_buf) {
 		return ((ls->pbuf ++) < ls->ebuf) ?
 			ls->input_string[ls->pbuf - 1] : -1;
 	}
 	while (1) {
-#ifndef NO_UCPP_BUF
+        /* If we've read everything return -1 */
 		if (ls->pbuf == ls->ebuf) {
-			ls->ebuf = fread(ls->input_buf, 1,
-				INPUT_BUF_MEMG, ls->input);
+            ls->ebuf = 0;
 			ls->pbuf = 0;
-		}
-		if (ls->ebuf == 0) return -1;
-		c = ls->input_buf[ls->pbuf ++];
-#else
-		int x = getc(ls->input);
+            return -1;
+        }
 
-		if (x == EOF) return -1;
-		c = x;
-#endif
+		c = ls->input_buf[ls->pbuf ++];
+
 		if (ls->flags & COPY_LINE) {
 			if (c == '\n') {
 				ls->copy_line[ls->cli] = 0;

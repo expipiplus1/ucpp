@@ -60,28 +60,6 @@
 
 /* ====================================================================== */
 /*
- * Buffering: there are two levels of buffering on input and output streams:
- * the standard libc buffering (manageable with setbuf() and setvbuf())
- * and some buffering provided by ucpp itself. The ucpp buffering uses
- * two buffers, of size respectively INPUT_BUF_MEMG and OUTPUT_BUF_MEMG
- * (as defined below).
- * You can disable one or both of these bufferings by defining the macros
- * NO_LIBC_BUF and NO_UCPP_BUF.
- */
-#cmakedefine NO_LIBC_BUF
-#cmakedefine NO_UCPP_BUF
-
-/*
- * Performance issues:
- * -- On memory-starved systems, such as Minix-i86, do not use ucpp
- * buffering; keep only libc buffering.
- *
- * On an Athlon 1200 running FreeBSD 4.7, the best performances are
- * achieved when libc buffering is activated.
- */
-
-/* ====================================================================== */
-/*
  * Define this if you want ucpp to generate tokenized PRAGMA tokens;
  * otherwise, it will generate raw string contents. This setting is
  * irrelevant to the stand-alone version of ucpp.
