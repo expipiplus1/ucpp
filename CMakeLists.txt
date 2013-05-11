@@ -68,7 +68,6 @@ set( ucpp_SOURCE arith.c
                  mem.h
                  nhash.c 
                  nhash.h 
-                 tune.h 
                  ucppi.h )
 
 set_source_files_properties( arith.c PROPERTIES HEADER_FILE_ONLY TRUE )
@@ -139,8 +138,6 @@ if( NOT HAVE_STRFTIME )
 endif()
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
-
-add_definitions( -DUCPP_CONFIG )
 
 if( UCPP_STAND_ALONE )
     add_definitions( -DSTAND_ALONE )

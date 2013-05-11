@@ -29,6 +29,9 @@
  *
  */
 
+#ifndef UCPP_CONFIG_H
+#define UCPP_CONFIG_H
+
 /* ====================================================================== */
 /*
  * The LOW_MEM macro triggers the use of macro storage which uses less
@@ -343,3 +346,69 @@
 #cmakedefine SEMPER_FIDELIS
 
 /* End of options overridable by UCPP_CONFIG and config.h */
+
+/* ====================================================================== */
+/*
+ * Some constants used for memory increment granularity. Increasing these
+ * values reduces the number of calls to malloc() but increases memory
+ * consumption.
+ *
+ * Values should be powers of 2.
+ */
+
+/* for cpp.c */
+#define COPY_LINE_LENGTH	80
+#define INPUT_BUF_MEMG		8192
+#define OUTPUT_BUF_MEMG		8192
+#define TOKEN_NAME_MEMG		64	/* must be at least 4 */
+#define TOKEN_LIST_MEMG		32
+#define INCPATH_MEMG		16
+#define GARBAGE_LIST_MEMG	32
+#define LS_STACK_MEMG		4
+#define FNAME_MEMG		32
+
+/* ====================================================================== */
+
+/* To protect the innocent. */
+#if defined(NO_UCPP_BUF) && defined(UCPP_MMAP)
+#undef UCPP_MMAP
+#endif
+
+#if defined(UCPP_MMAP) || defined(POSIX_JMP)
+#ifndef _POSIX_SOURCE
+#define _POSIX_SOURCE	1
+#endif
+#endif
+
+/*
+ * C90 does not know about the "inline" keyword, but C99 does know,
+ * and some C90 compilers know it as an extension. This part detects
+ * these occurrences.
+ */
+
+#ifndef INLINE
+
+#if __STDC__ && __STDC_VERSION__ >= 199901L
+/* this is a C99 compiler, keep inline unchanged */
+#elif defined(__GNUC__)
+/* this is GNU gcc; modify inline. The semantics is not identical to C99
+   but the differences are irrelevant as long as inline functions are static */
+#undef inline
+#define inline __inline__
+#elif defined(__DECC) && defined(__linux__)
+/* this is Compaq C under Linux, use __inline__ */
+#undef inline
+#define inline __inline__
+#else
+/* unknown compiler -> deactivate inline */
+#undef inline
+#define inline
+#endif
+
+#else
+/* INLINE has been set, use its value */
+#undef inline
+#define inline INLINE
+#endif
+
+#endif

@@ -133,7 +133,7 @@ enum {
 	UMINUS		/* unary - */
 };
 
-#include "tune.h"
+#include "config.h"
 #include <stdio.h>
 #include <setjmp.h>
 

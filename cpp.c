@@ -33,7 +33,7 @@
 /* uncomment the following if you cannot set it with a compiler flag */
 /* #define STAND_ALONE */
 
-#include "tune.h"
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
