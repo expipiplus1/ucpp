@@ -58,7 +58,8 @@ set( CMAKE_C_FLAGS_PROFILE
 set( ucpp_SOURCE arith.c
                  arith.h
                  assert.c 
-                 cpp.c 
+                 config.h
+                 cpp.c
                  cpp.h 
                  eval.c
                  lexer.c 
@@ -72,6 +73,7 @@ set( ucpp_SOURCE arith.c
 
 set_source_files_properties( arith.c PROPERTIES HEADER_FILE_ONLY TRUE )
 set_source_files_properties( arith.h PROPERTIES HEADER_FILE_ONLY TRUE )
+set_source_files_properties( config.h PROPERTIES GENERATED TRUE )
 
 include( CheckFunctionExists )
 
@@ -136,8 +138,7 @@ if( NOT HAVE_STRFTIME )
     set( NOSTRFTIME ON CACHE BOOL "The system doesn't have strftime" )
 endif()
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_definitions( -DUCPP_CONFIG )
 
