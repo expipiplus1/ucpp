@@ -65,10 +65,10 @@
 enum {
 	S_START, S_SPACE, S_BANG, S_STRING, S_STRING2, S_COLON,
 	S_SHARP, S_PCT, S_PCT2, S_PCT3, S_AMPER, S_CHAR, S_CHAR2, S_STAR,
-	S_PLUS, S_MINUS, S_DOT, S_DOT2, S_SLASH, S_NUMBER, S_NUMBER2, S_LT,
-	S_LT2, S_EQ, S_GT, S_GT2, S_CIRC, S_PIPE, S_BACKSLASH,
-	S_COMMENT, S_COMMENT2, S_COMMENT3, S_COMMENT4, S_COMMENT5,
-	S_NAME, S_NAME_BS, S_LCHAR,
+    S_PLUS, S_MINUS, S_DOT, S_DOT2, S_SLASH, S_NUMBER, S_NUMBER2,
+    S_NUMBER3, S_NUMBER4, S_LT, S_LT2, S_EQ, S_GT, S_GT2, S_CIRC,
+    S_PIPE, S_BACKSLASH, S_COMMENT, S_COMMENT2, S_COMMENT3, S_COMMENT4,
+    S_COMMENT5, S_NAME, S_NAME_BS, S_LCHAR,
 	MSTATE,
 	S_ILL, S_DDOT, S_DDSHARP, S_BS, S_ROGUE_BS, S_BEHEAD, S_DECAY,
 	S_TRUNC, S_TRUNCC, S_OUCH
@@ -236,14 +236,24 @@ static struct machine_state {
 
 	/* after a number */
 	{ S_NUMBER,	{ ANY },	FRZ(STO(NUMBER))	},
-	{ S_NUMBER,	{ ALP, NUM },	PUT(S_NUMBER)		},
-	{ S_NUMBER,	{ '.' },	PUT(S_NUMBER)		},
+    { S_NUMBER,	{ ALP, NUM },	PUT(S_NUMBER)		},
+    { S_NUMBER,	{ '.' },	PUT(S_NUMBER3)		},
 	{ S_NUMBER,	{ 'E', 'e' },	PUT(S_NUMBER2)		},
 	{ S_NUMBER,	{ 'P', 'p' },	PUT(S_NUMBER2)		},
 
 	{ S_NUMBER2,	{ ANY },	FRZ(STO(NUMBER))	},
 	{ S_NUMBER2,	{ ALP, NUM },	PUT(S_NUMBER)		},
 	{ S_NUMBER2,	{ '+', '-' },	PUT(S_NUMBER)		},
+
+    /* A number having read a . */
+    { S_NUMBER3,	{ ANY },	FRZ(STO(NUMBER))	},
+    { S_NUMBER3,	{ ALP, NUM },	PUT(S_NUMBER3)		},
+    { S_NUMBER3,	{ 'E', 'e' },	PUT(S_NUMBER4)		},
+    { S_NUMBER3,	{ 'P', 'p' },	PUT(S_NUMBER4)		},
+
+    { S_NUMBER4,	{ ANY },	FRZ(STO(NUMBER))	},
+    { S_NUMBER4,	{ ALP, NUM },	PUT(S_NUMBER3)		},
+    { S_NUMBER4,	{ '+', '-' },	PUT(S_NUMBER3)		},
 
 	/* after a < */
 	{ S_LT,		{ ANY },	FRZ(STO(LT))		},
