@@ -1321,7 +1321,14 @@ do_include_next:
     ls->pbuf = 0;
     rewind(f);
     file_buffer = getmem(ls->ebuf+1);
-    fread(file_buffer, 1, ls->ebuf, f);
+    size_t bytes_read;
+    bytes_read = fread(file_buffer, 1, ls->ebuf, f);
+    if( bytes_read != ls->ebuf )
+    {
+        error(l, "error reading file '%s'", fname);
+        freemem(file_buffer);
+        return 1;
+    }
     file_buffer[ls->ebuf] = 0;
     ls->input_buf = file_buffer;
     ls->external_buffer = 0;
